@@ -23,11 +23,12 @@ export default function Root() {
           <ul>
             <div className="nav-title">LogicFlow</div>
             <li>
-              <a href={`/graph/get-started`}>Graph</a>
+              <a href={`/graph/get-started`}>Overview</a>
             </li>
             <div className="nav-title">Extension</div>
             <li>
               <a href={`/extension/bpmn`}>BPMN</a>
+              <a href={`/extension/dynamic-group`}>Dynamic Group</a>
             </li>
             <div className="nav-title">Engine</div>
             <li>
