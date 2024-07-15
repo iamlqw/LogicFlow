@@ -1386,12 +1386,14 @@ export namespace LogicFlow {
     [key: string]: string | undefined
   }
 
-  export type PropertiesType = {
+  export interface PropertiesType {
     width?: number
     height?: number
     rx?: number
     ry?: number
-  } & Record<string, any>
+
+    [key: string]: any
+  }
   export type AttributesType = Record<string, any>
 
   export type VectorData = {
@@ -1490,14 +1492,14 @@ export namespace LogicFlow {
     [key: string]: any
   }
 
-  export interface NodeConfig {
+  export interface NodeConfig<P extends PropertiesType = PropertiesType> {
     id?: string
     type: string
     x: number
     y: number
     text?: TextConfig | string
     zIndex?: number
-    properties?: PropertiesType
+    properties?: P
     virtual?: boolean // 是否虚拟节点
     rotate?: number
 
@@ -1793,7 +1795,7 @@ export namespace LogicFlow {
   }
   export type FocusOnArgsType = FocusOnById | FocusOnByCoordinate
 
-  export type BaseNodeModelCtor = typeof BaseNodeModel
+  export type BaseNodeModelCtor = typeof BaseNodeModel<PropertiesType>
   export type BaseEdgeModelCtor = typeof BaseEdgeModel
 
   export type GraphElementCtor = BaseNodeModelCtor | BaseEdgeModelCtor
