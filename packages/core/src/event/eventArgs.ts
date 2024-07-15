@@ -1,5 +1,4 @@
-import {
-  LogicFlow,
+import LogicFlow, {
   BaseNodeModel,
   BaseEdgeModel,
   Model,
