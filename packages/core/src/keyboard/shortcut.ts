@@ -1,41 +1,76 @@
 import LogicFlow from '../LogicFlow'
+import { map } from 'lodash-es'
 import GraphModel from '../model/GraphModel'
 
 import NodeData = LogicFlow.NodeData
 import EdgeData = LogicFlow.EdgeData
+import NodeConfig = LogicFlow.NodeConfig
+import EdgeConfig = LogicFlow.EdgeConfig
 
 let selected: LogicFlow.GraphData | null = null
 
-function translationNodeData(nodeData: NodeData, distance: number) {
-  nodeData.x += distance
-  nodeData.y += distance
-  if (nodeData.text) {
-    nodeData.text.x += distance
-    nodeData.text.y += distance
+export function transformNodeData(
+  nodeData: NodeData,
+  distance: number,
+): NodeConfig {
+  const { x, y, text } = nodeData
+  // 重新计算 text 的位置，保证粘贴后 text 位置和复制的原节点相对位置一致
+  const nextText = text
+    ? {
+        x: text.x + distance,
+        y: text.y + distance,
+        value: text.value,
+      }
+    : undefined
+
+  return {
+    ...nodeData,
+    id: '',
+    x: x + distance,
+    y: y + distance,
+    text: nextText,
   }
-  return nodeData
 }
 
-function translationEdgeData(edgeData: EdgeData, distance: number) {
-  if (edgeData.startPoint) {
-    edgeData.startPoint.x += distance
-    edgeData.startPoint.y += distance
+export function transformEdgeData(
+  edgeData: EdgeData,
+  distance: number,
+): EdgeConfig {
+  const { startPoint, endPoint, pointsList, text, ...edgeConfig } = edgeData
+  // 清除原始边的 id
+  edgeConfig.id = ''
+
+  // 重新计算边的位置，包括 startPoint、endPoint、pointsList 以及 text
+  // TODO: 看这个是否可以提出一个通用方法，用于重新计算边的位置
+  const nextStartPoint = {
+    x: startPoint.x + distance,
+    y: startPoint.y + distance,
   }
-  if (edgeData.endPoint) {
-    edgeData.endPoint.x += distance
-    edgeData.endPoint.y += distance
+  const nextEndPoint = {
+    x: endPoint.x + distance,
+    y: endPoint.y + distance,
   }
-  if (edgeData.pointsList && edgeData.pointsList.length > 0) {
-    edgeData.pointsList.forEach((point) => {
-      point.x += distance
-      point.y += distance
-    })
+  const newPointsList: LogicFlow.Point[] = map(pointsList, (point) => {
+    return {
+      x: point.x + distance,
+      y: point.y + distance,
+    }
+  })
+  const nextText = text
+    ? {
+        ...text,
+        x: text.x + distance,
+        y: text.y + distance,
+      }
+    : undefined
+
+  return {
+    ...edgeConfig,
+    startPoint: nextStartPoint,
+    endPoint: nextEndPoint,
+    pointsList: newPointsList,
+    text: nextText,
   }
-  if (edgeData.text) {
-    edgeData.text.x += distance
-    edgeData.text.y += distance
-  }
-  return edgeData
 }
 
 const TRANSLATION_DISTANCE = 40
@@ -65,10 +100,10 @@ export function initDefaultShortcut(lf: LogicFlow, graph: GraphModel) {
     }
     selected = elements
     selected.nodes.forEach((node) =>
-      translationNodeData(node, TRANSLATION_DISTANCE),
+      transformNodeData(node, TRANSLATION_DISTANCE),
     )
     selected.edges.forEach((edge) =>
-      translationEdgeData(edge, TRANSLATION_DISTANCE),
+      transformEdgeData(edge, TRANSLATION_DISTANCE),
     )
     return false
   })
@@ -86,10 +121,10 @@ export function initDefaultShortcut(lf: LogicFlow, graph: GraphModel) {
       addElements.nodes.forEach((node) => lf.selectElementById(node.id, true))
       addElements.edges.forEach((edge) => lf.selectElementById(edge.id, true))
       selected.nodes.forEach((node) =>
-        translationNodeData(node, TRANSLATION_DISTANCE),
+        transformNodeData(node, TRANSLATION_DISTANCE),
       )
       selected.edges.forEach((edge) =>
-        translationEdgeData(edge, TRANSLATION_DISTANCE),
+        transformEdgeData(edge, TRANSLATION_DISTANCE),
       )
       CHILDREN_TRANSLATION_DISTANCE =
         CHILDREN_TRANSLATION_DISTANCE + TRANSLATION_DISTANCE

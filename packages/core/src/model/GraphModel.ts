@@ -755,7 +755,7 @@ export class GraphModel {
     if (nodeX && nodeY) {
       node.x = snapToGrid(nodeX, this.gridSize)
       node.y = snapToGrid(nodeY, this.gridSize)
-      if (typeof node.text === 'object') {
+      if (typeof node.text === 'object' && node.text !== null) {
         // 原来的处理是：node.text.x -= getGridOffset(nodeX, this.gridSize)
         // 由于snapToGrid()使用了Math.round()四舍五入的做法，因此无法判断需要执行
         // node.text.x = node.text.x + getGridOffset()
